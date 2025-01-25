@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"log"
 
 	"github.com/khaleelsyed/goDFS/p2p"
@@ -12,7 +13,14 @@ func main() {
 		HandshakeFunc: p2p.NOPHandshakeFunc,
 		Decoder:       p2p.DefaultDecoder{},
 	}
-	tr := p2p.NewTCPTransport(*tcpOpts)
+	var tr p2p.Transport = p2p.NewTCPTransport(*tcpOpts)
+
+	go func() {
+		for {
+			msg := <-tr.Consume()
+			fmt.Printf("%+v\n", msg)
+		}
+	}()
 
 	if err := tr.ListenAndAccept(); err != nil {
 		log.Fatal(err)
